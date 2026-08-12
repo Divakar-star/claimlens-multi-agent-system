@@ -1,0 +1,15 @@
+# Pinned exactly (no >=) per task.md 0.4.
+# Versions resolved from PyPI on 2026-08-12.
+langgraph==1.2.11
+google-genai==2.17.0
+fastapi==0.141.1
+uvicorn==0.52.1
+Jinja2==3.1.6
+chromadb==1.5.9
+rank-bm25==0.2.2
+sentence-transformers==5.7.0
+pydantic==2.13.4
+pydantic-settings==2.15.0
+python-dotenv==1.2.2
+pytest==9.1.1
+mcp==2.0.0
