@@ -8,6 +8,10 @@ Jinja2==3.1.6
 chromadb==1.5.9
 rank-bm25==0.2.2
 sentence-transformers==5.7.0
+# Pinned so the Dockerfile can pre-install the CPU-only build of the same
+# version from download.pytorch.org. Left unqualified here (no +cpu) so a
+# plain `pip install -r requirements.txt` still works on macOS and Windows.
+torch==2.13.0
 pydantic==2.13.4
 pydantic-settings==2.15.0
 python-dotenv==1.2.2

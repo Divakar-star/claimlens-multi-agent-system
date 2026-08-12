@@ -1,0 +1,16 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.chroma
+.bm25
+traces
+*.sqlite3
+docs
+tests
+README.md
+Dockerfile
+.dockerignore
