@@ -14,4 +14,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "scripts"]
+markers = [
+    "requires_model: needs the sentence-transformers model; run via make test-model or make verify",
+]

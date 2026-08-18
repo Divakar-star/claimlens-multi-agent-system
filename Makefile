@@ -1,7 +1,7 @@
 # All targets assume Python 3.11. See README quickstart.
 PY ?= python3
 
-.PHONY: install data index run eval test docker-build docker-run clean
+.PHONY: install data index run eval test test-model verify docker-build docker-run clean
 
 install:
 	pip install -r requirements.txt
@@ -19,8 +19,19 @@ run:
 eval:
 	$(PY) eval/run_eval.py $(ARGS)
 
+# Fast tier: no model, no network, no downloads. This is what CI runs.
 test:
 	$(PY) -m pytest -q
+
+# Full tier: adds the tests that need real embeddings.
+test-model:
+	CLAIMLENS_RUN_MODEL_TESTS=1 $(PY) -m pytest -q
+
+# One command per phase gate. Builds the image and runs the full suite inside
+# it, so the result does not depend on anything installed on the host.
+verify: docker-build
+	docker run --rm -e CLAIMLENS_RUN_MODEL_TESTS=1 claimlens:latest \
+		python -m pytest -q -rA
 
 docker-build:
 	docker build -t claimlens:latest .

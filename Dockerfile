@@ -51,12 +51,12 @@ COPY src/ ./src/
 COPY data/ ./data/
 COPY eval/ ./eval/
 COPY scripts/ ./scripts/
+COPY tests/ ./tests/
 COPY Makefile pyproject.toml ./
 
 # Embedding weights and indexes are baked in at build time so the container
 # starts instantly and the demo runs with no network and no API key.
-RUN HF_HUB_OFFLINE=0 TRANSFORMERS_OFFLINE=0 python scripts/build_index.py \
- || echo "index build skipped (phase 2 not implemented yet)"
+RUN HF_HUB_OFFLINE=0 TRANSFORMERS_OFFLINE=0 python scripts/build_index.py
 
 EXPOSE 8000
 CMD ["uvicorn", "claimlens.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

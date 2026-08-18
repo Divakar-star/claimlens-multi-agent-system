@@ -10,7 +10,6 @@ __pycache__
 traces
 *.sqlite3
 docs
-tests
 README.md
 Dockerfile
 .dockerignore
