@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted
+Accepted, partially superseded by ADR 0006. The reasoning about keeping
+arithmetic out of the model, and about tiering by task difficulty, stands. The
+specific model assignment does not: measured free-tier quotas made both 2.5
+tiers unusable. ADR 0006 records what replaced them.
 
 ## Context
 

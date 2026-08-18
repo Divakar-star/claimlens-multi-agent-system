@@ -15,9 +15,15 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
 
-load_dotenv()
+    load_dotenv()
+except ImportError:  # pragma: no cover
+    # python-dotenv is pinned in requirements.txt, but config must still import
+    # in a minimal environment (data generation, CI lint) where it is absent.
+    # Environment variables set directly by the shell still work.
+    pass
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -25,9 +31,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # in the eval harness. Free-tier runs cost $0, so a real-dollar figure would be
 # meaningless; these are Gemini's published PAID-tier rates so the agentic-vs-
 # baseline comparison can be quantitative.
-# Source: https://ai.google.dev/gemini-api/docs/pricing -- retrieved 2026-08-12.
+# Source: https://ai.google.dev/gemini-api/docs/pricing -- retrieved 2026-08-18.
 # Verify before quoting these numbers anywhere; prices change.
 PRICING_USD_PER_MTOK: dict[str, dict[str, float]] = {
+    "gemini-3.1-flash-lite": {"input": 0.25, "output": 1.50},
     "gemini-2.5-flash": {"input": 0.30, "output": 2.50},
     "gemini-2.5-flash-lite": {"input": 0.10, "output": 0.40},
 }
@@ -47,18 +54,26 @@ class Settings:
 
     gemini_api_key: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", "").strip())
 
+    # Both tiers default to the same model. That is not a mistake -- see ADR
+    # 0006. The 2.5 tiers task.md specifies are capped at 20 requests per day on
+    # the free tier, which is less than one eval run; 3.1 Flash Lite allows 500.
+    # The two names are kept separate so the two-tier design of ADR 0004 is one
+    # .env edit away.
     model_reasoning: str = field(
-        default_factory=lambda: os.getenv("MODEL_REASONING", "gemini-2.5-flash")
+        default_factory=lambda: os.getenv("MODEL_REASONING", "gemini-3.1-flash-lite")
     )
     model_cheap: str = field(
-        default_factory=lambda: os.getenv("MODEL_CHEAP", "gemini-2.5-flash-lite")
+        default_factory=lambda: os.getenv("MODEL_CHEAP", "gemini-3.1-flash-lite")
     )
 
-    # Rate limiting. Conservative defaults on purpose -- see README,
+    # Rate limiting. Measured from the AI Studio rate-limit page for this
+    # project on 2026-08-18: 3.1 Flash Lite 15 RPM / 500 RPD, 2.5 Flash 5 RPM /
+    # 20 RPD, 2.5 Flash Lite 10 RPM / 20 RPD, all at 250K TPM. The defaults sit
+    # below those measurements so a burst does not walk into a 429. See README,
     # "Running on a free-tier quota".
-    rpm_flash: int = field(default_factory=lambda: _i("RPM_FLASH", 10))
-    rpm_flash_lite: int = field(default_factory=lambda: _i("RPM_FLASH_LITE", 15))
-    rpd_budget: int = field(default_factory=lambda: _i("RPD_BUDGET", 200))
+    rpm_flash: int = field(default_factory=lambda: _i("RPM_FLASH", 4))
+    rpm_flash_lite: int = field(default_factory=lambda: _i("RPM_FLASH_LITE", 12))
+    rpd_budget: int = field(default_factory=lambda: _i("RPD_BUDGET", 450))
 
     # Escalation policy.
     auto_decide_max_usd: float = field(default_factory=lambda: _f("AUTO_DECIDE_MAX_USD", 25000.0))
