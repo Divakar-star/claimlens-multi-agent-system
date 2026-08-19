@@ -177,7 +177,12 @@ class MiniLMEmbedder:
         from sentence_transformers import SentenceTransformer
 
         self._model = SentenceTransformer(model_name or settings.embedding_model)
-        self.dimensions = self._model.get_sentence_embedding_dimension()
+        # Renamed in sentence-transformers 5.x; the old name still works but
+        # warns. Try the new one first and fall back for older pins.
+        getter = getattr(self._model, "get_embedding_dimension", None) or (
+            self._model.get_sentence_embedding_dimension
+        )
+        self.dimensions = getter()
 
     def encode(self, texts: list[str]) -> list[list[float]]:
         return [list(map(float, v)) for v in self._model.encode(texts, show_progress_bar=False)]
